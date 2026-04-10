@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure Earn Pro</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        :root { --bg: #0f0f0f; --card: #1e1e1e; --accent: #00d2ff; --text: #ffffff; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 0; overflow-x: hidden; }
+        .header-stats { display: flex; justify-content: space-around; background: var(--card); padding: 15px; border-bottom: 2px solid var(--accent); }
+        .stat-item { text-align: center; font-size: 12px; }
+        .stat-item span { display: block; font-size: 16px; font-weight: bold; color: var(--accent); }
+        
+        .nav-bar { position: fixed; bottom: 0; width: 100%; background: #1a1a1a; display: flex; justify-content: space-around; padding: 12px 0; border-top: 1px solid #333; }
+        .nav-btn { cursor: pointer; opacity: 0.6; transition: 0.3s; font-size: 11px; text-align: center; }
+        .nav-btn.active { opacity: 1; color: var(--accent); }
+        
+        .screen { display: none; padding: 20px; animation: fadeIn 0.5s; }
+        .screen.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .btn { background: var(--accent); color: #000; border: none; padding: 15px; border-radius: 12px; width: 100%; font-weight: bold; margin: 10px 0; }
+        .list-box { background: var(--card); padding: 15px; border-radius: 10px; margin-top: 10px; font-size: 14px; }
+        .flex { display: flex; justify-content: space-between; margin-bottom: 8px; }
+    </style>
+</head>
+<body>
+
+    <div class="header-stats">
+        <div class="stat-item">Total Users <span id="totalUsers">1,240</span></div>
+        <div class="stat-item">Total Paid <span id="totalPaid">$5,420</span></div>
+    </div>
+
+    <div class="container">
+        <div id="home" class="screen active">
+            <h3 id="welcomeMsg">Hello, User</h3>
+            <div style="background: var(--card); padding: 30px; border-radius: 20px; text-align: center; margin-bottom: 20px;">
+                <p>Available Balance</p>
+                <h1 id="balance">$0.00</h1>
+            </div>
+            <button class="btn" style="background: linear-gradient(to right, #00d2ff, #3a7bd5);" onclick="watchAd()">🚀 WATCH ADS & EARN</button>
+        </div>
+
+        <div id="top" class="screen">
+            <h3>🏆 Leaderboard</h3>
+            <div class="list-box">
+                <p><b>Top Income</b></p>
+                <div class="flex"><span>1. Fahim</span> <span>$150.00</span></div>
+                <div class="flex"><span>2. Sumit</span> <span>$125.50</span></div>
+            </div>
+            <div class="list-box" style="margin-top: 20px;">
+                <p><b>Top Referrals</b></p>
+                <div class="flex"><span>1. Aryan</span> <span>450 Refers</span></div>
+                <div class="flex"><span>2. Joy</span> <span>320 Refers</span></div>
+            </div>
+        </div>
+
+        <div id="history" class="screen">
+            <h3>✅ Recent Payouts</h3>
+            <div id="paymentList">
+                <div class="list-box"><div class="flex"><span>+88017***54</span> <span>$10.00 (Success)</span></div></div>
+                <div class="list-box"><div class="flex"><span>+88019***21</span> <span>$5.00 (Success)</span></div></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="nav-bar">
+        <div class="nav-btn active" onclick="changeTab('home', this)">🏠<br>Home</div>
+        <div class="nav-btn" onclick="changeTab('top', this)">🏆<br>Leaderboard</div>
+        <div class="nav-btn" onclick="changeTab('history', this)">📜<br>History</div>
+    </div>
+
+<script>
+    let tg = window.Telegram.WebApp;
+    tg.expand();
+
+    // Security: Anti-Fake Account Logic
+    const userId = tg.initDataUnsafe.user?.id || "guest";
+    document.getElementById('welcomeMsg').innerText = "Hello, " + (tg.initDataUnsafe.user?.first_name || "Guest");
+
+    let balance = parseFloat(localStorage.getItem('bal_' + userId)) || 0.00;
+    updateUI();
+
+    function watchAd() {
+        // Anti-Bot: Check if user is on Telegram
+        if(userId === "guest") {
+            alert("Please open from Telegram!");
+            return;
+        }
+
+        // Open Ad Link
+        window.open('
+
+// Rewarded Popup
+
+show_10858969('pop').then(() => {
+    // user watch ad till the end or close it in interstitial format
+    // your code to reward user for rewarded format
+}).catch(e => {
+    // user get error during playing ad
+    // do nothing or whatever you want
+})
+
+      
+
+// Rewarded interstitial
+
+show_10858969().then(() => {
+    // You need to add your user reward function here, which will be executed after the user watches the ad.
+    // For more details, please refer to the detailed instructions.
+    alert('You have seen an ad!');
+})
+
+          ', '_blank');
+
+        // Logic: Add balance after delay to prevent click-farming
+        setTimeout(() => {
+            balance += 0.01;
+            localStorage.setItem('bal_' + userId, balance);
+            updateUI();
+            tg.showScanQrPopup({text: "Verifying Ad View..."}); // Fake verification effect
+            setTimeout(() => tg.closeScanQrPopup(), 2000);
+        }, 1000);
+    }
+
+    function updateUI() {
+        document.getElementById('balance').innerText = "$" + balance.toFixed(2);
+    }
+
+    function changeTab(id, el) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        el.classList.add('active');
+    }
+</script>
+</body>
+          </html>
