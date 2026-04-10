@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Easy Money Pro</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src='//libtl.com/sdk.js' data-zone='10858969' data-sdk='show_10858969'></script>
+    
+    <style>
+        :root { --primary: #00d2ff; --bg: #0b0b0b; --card: #161616; --text: #ffffff; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 0; overflow-x: hidden; }
+        .container { padding: 20px; padding-bottom: 80px; }
+        .screen { display: none; animation: fadeIn 0.4s; }
+        .screen.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* Stats Header */
+        .global-stats { display: flex; justify-content: space-around; background: var(--card); padding: 10px; border-bottom: 1px solid #333; font-size: 12px; }
+        .global-stats span { color: var(--primary); font-weight: bold; }
+
+        /* Balance Card */
+        .card { background: var(--card); border-radius: 15px; padding: 20px; border: 1px solid #222; margin-bottom: 20px; text-align: center; }
+        .bal-val { font-size: 38px; font-weight: bold; color: var(--primary); margin: 10px 0; }
+
+        /* Buttons */
+        .btn { background: var(--primary); color: #000; border: none; padding: 16px; border-radius: 12px; width: 100%; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.2s; }
+        .btn:active { transform: scale(0.98); }
+
+        /* Lists */
+        .list-item { display: flex; justify-content: space-between; padding: 12px; border-bottom: 1px solid #222; font-size: 14px; }
+
+        /* Bottom Nav */
+        .nav { position: fixed; bottom: 0; width: 100%; background: #000; display: flex; border-top: 1px solid #333; padding: 10px 0; }
+        .nav-item { flex: 1; text-align: center; font-size: 11px; color: #666; cursor: pointer; }
+        .nav-item.active { color: var(--primary); }
+    </style>
+</head>
+<body>
+
+    <div class="global-stats">
+        <div>Users: <span id="totalUsers">1,420</span></div>
+        <div>Paid: <span id="totalPaid">$5,840</span></div>
+    </div>
+
+    <div class="container">
+        <div id="home" class="screen active">
+            <h3 id="userWelcome">Hello, Explorer</h3>
+            <div class="card">
+                <p style="margin:0; color:#888;">Available Balance</p>
+                <div class="bal-val" id="mainBalance">$0.00</div>
+            </div>
+            <button class="btn" onclick="watchAd()">🚀 WATCH AD & EARN ($0.01)</button>
+            
+            <div style="margin-top:25px;">
+                <h4>Recent Success Payouts</h4>
+                <div id="payouts" class="card" style="text-align:left; padding:10px;">
+                    <div class="list-item"><span>017***54</span> <span>$10.00 ✅</span></div>
+                    <div class="list-item"><span>019***12</span> <span>$5.50 ✅</span></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="top" class="screen">
+            <h3>🏆 Leaderboard</h3>
+            <div class="card" style="text-align:left;">
+                <p><b>Top Earners</b></p>
+                <div class="list-item"><span>1. Tanvir Islam</span> <span>$145.00</span></div>
+                <div class="list-item"><span>2. Rakib Hasan</span> <span>$122.30</span></div>
+                <div class="list-item"><span>3. Sakil Ahmed</span> <span>$98.10</span></div>
+            </div>
+            <div class="card" style="text-align:left;">
+                <p><b>Top Referrals</b></p>
+                <div class="list-item"><span>1. Mim Khan</span> <span>420 Refers</span></div>
+                <div class="list-item"><span>2. Shuvo</span> <span>310 Refers</span></div>
+            </div>
+        </div>
+
+        <div id="refer" class="screen">
+            <h3>👥 Invite Friends</h3>
+            <div class="card">
+                <p>Get $0.05 for every active friend you invite!</p>
+                <div id="refLink" style="background:#000; padding:10px; border-radius:8px; border:1px dashed #444; font-size:12px; word-break:break-all;">Loading link...</div>
+                <br>
+                <button class="btn" onclick="copyRef()">Copy Referral Link</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="nav">
+        <div class="nav-item active" onclick="showScreen('home', this)">🏠<br>Home</div>
+        <div class="nav-item" onclick="showScreen('top', this)">🏆<br>Leaderboard</div>
+        <div class="nav-item" onclick="showScreen('refer', this)">👥<br>Refer</div>
+    </div>
+
+    <script>
+        let tg = window.Telegram.WebApp;
+        tg.expand();
+        const user = tg.initDataUnsafe.user;
+        const userId = user ? user.id : "guest";
+
+        document.getElementById('userWelcome').innerText = "Hello, " + (user?.first_name || "User");
+        document.getElementById('refLink').innerText = "https://t.me/easymoneyv1bot?start=" + userId;
+
+        let balance = parseFloat(localStorage.getItem('bal_' + userId)) || 0.00;
+        updateUI();
+
+        function watchAd() {
+            if(typeof show_10858969 === 'function') {
+                show_10858969().then(() => {
+                    // বিজ্ঞাপন সফলভাবে শেষ হলে ব্যালেন্স যোগ হবে
+                    addBalance(0.01);
+                }).catch((e) => {
+                    tg.showAlert("Ad not ready. Try again in a few seconds.");
+                });
+            } else {
+                // Fallback (যদি SDK লোড হতে দেরি হয়)
+                tg.showAlert("Loading Ads... Please wait.");
+            }
+        }
+
+        function addBalance(amount) {
+            balance += amount;
+            localStorage.setItem('bal_' + userId, balance);
+            updateUI();
+            tg.showConfirm("Success! $0.01 added to your balance.");
+        }
+
+        function updateUI() {
+            document.getElementById('mainBalance').innerText = "$" + balance.toFixed(2);
+        }
+
+        function showScreen(id, el) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            el.classList.add('active');
+        }
+
+        function copyRef() {
+            let link = document.getElementById('refLink').innerText;
+            navigator.clipboard.writeText(link);
+            tg.showAlert("Referral link copied!");
+        }
+    </script>
+</body>
+</html>
